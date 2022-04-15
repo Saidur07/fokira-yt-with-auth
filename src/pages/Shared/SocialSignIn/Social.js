@@ -9,20 +9,27 @@ import {
   useSignInWithGoogle,
 } from "react-firebase-hooks/auth";
 import Loader from "../Loader/Loader";
+import { toast } from "react-toastify";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Social = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  let from = location.state?.from?.pathname || "/";
   const [signInWithGoogle, googleUser, googleLoading, googleError] =
     useSignInWithGoogle(auth);
   const [signInWithFacebook, FacebookUser, FacebookLoading, FacebookError] =
     useSignInWithFacebook(auth);
   const [signInWithGithub, githubUser, githubLoading, githubError] =
     useSignInWithGithub(auth);
-  if (googleUser || FacebookUser || githubUser) {
-    console.log(googleUser?.user);
-    console.log(FacebookUser?.user);
-    console.log(githubUser?.user);
+  if (googleError || FacebookError || githubError) {
+    toast.error(
+      `ERROR : ${googleError?.code || FacebookError?.code || githubError?.code}`
+    );
   }
-
+  if (googleUser || FacebookUser || githubUser) {
+    navigate(from, { replace: true });
+  }
   return (
     <div className="container w-1/3 mx-auto my-6">
       <div className="flex justify-center items-center">
@@ -35,13 +42,7 @@ const Social = () => {
       ) : (
         ""
       )}
-      {googleError || FacebookError ? (
-        <p className="my-6 text-center text-red-500">
-          ERROR : {googleError?.code} {FacebookError?.code} {githubError?.code}
-        </p>
-      ) : (
-        ""
-      )}
+
       <div className="">
         <button
           onClick={() => signInWithGoogle()}
@@ -49,7 +50,7 @@ const Social = () => {
         >
           <img style={{ width: "30px" }} src={google} alt="" />
           <span className="px-2 text-lg font-semibold text-slate-700">
-            Google Login
+            Login With Google
           </span>
         </button>
         <button
@@ -58,7 +59,7 @@ const Social = () => {
         >
           <img style={{ width: "30px" }} src={facebook} alt="" />
           <span className="px-2 text-lg font-semibold text-slate-700">
-            Facebook Login
+            Login With Facebook
           </span>
         </button>
         <button
@@ -67,7 +68,7 @@ const Social = () => {
         >
           <img style={{ width: "30px" }} src={github} alt="" />
           <span className="px-2 text-lg font-semibold text-slate-700">
-            Github Login
+            Login With Github
           </span>
         </button>
       </div>

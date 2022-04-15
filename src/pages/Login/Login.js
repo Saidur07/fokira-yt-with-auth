@@ -3,7 +3,8 @@ import {
   useSendPasswordResetEmail,
   useSignInWithEmailAndPassword,
 } from "react-firebase-hooks/auth";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import auth from "../../firebase.init";
 import Loader from "../Shared/Loader/Loader";
 import Social from "../Shared/SocialSignIn/Social";
@@ -11,6 +12,9 @@ import Social from "../Shared/SocialSignIn/Social";
 const Login = () => {
   const emailRef = useRef("");
   const passwordRef = useRef("");
+  const navigate = useNavigate();
+  const location = useLocation();
+  let from = location.state?.from?.pathname || "/";
   const [signInWithEmailAndPassword, user, loading, error] =
     useSignInWithEmailAndPassword(auth);
   const [sendPasswordResetEmail, sending] = useSendPasswordResetEmail(auth);
@@ -23,17 +27,21 @@ const Login = () => {
     signInWithEmailAndPassword(email, password);
   };
   if (user) {
-    console.log(user);
+    navigate(from, { replace: true });
+  }
+  if (error) {
+    toast.error(`ERROR : ${error}`);
   }
   const resetPassword = async () => {
     const email = emailRef.current.value;
     if (email) {
       await sendPasswordResetEmail(email);
-      // toast('Sent email');
+      toast.success("Sent email!");
     } else {
-      // toast('please enter your email address');
+      toast.warning("please enter your email address");
     }
   };
+
   return (
     <div>
       <h1 className="text-5xl text-center my-8 text-gray-700">HEY! LOGIN!!</h1>
@@ -88,11 +96,7 @@ const Login = () => {
           </p>
         </div>
         {loading || sending ? <Loader></Loader> : ""}
-        {error ? (
-          <p className="my-6 text-center text-red-500">ERROR : {error.code}</p>
-        ) : (
-          ""
-        )}
+
         <button
           type="submit"
           className="text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-4 text-center block mx-auto w-1/2"
